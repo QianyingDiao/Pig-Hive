@@ -1,4 +1,4 @@
-# Assignment - Pig and Hive
+# Assignment - Pig and Hive (10 points)
 
 **You should thoroughly read through the entire assignment before beginning your work!**
 
@@ -159,7 +159,11 @@ The files to be committed and pushed to the repository for this assignment are:
 * `hive-script.hql` (your Hive script)
 * `hive-results.csv` 
 
+
+
 ## Grading Rubric
+
+Pig and Hive scripts are worth 3 points each. Output files are worth 2 points each.
 
 * We will look at the results files and the scripts. If the result files are exactly what is expected, in the proper format, etc., we may run your scripts to make sure they produce the output. If everything works, you will get full credit for the problem.
 * If the results files are not what is expected, or the scripts produce something different than expected, we will look at code and provide partial credit where possible and applicable.
