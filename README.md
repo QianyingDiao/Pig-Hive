@@ -2,7 +2,62 @@
 
 **You should thoroughly read through the entire assignment before beginning your work!**
 
-## Pig and Hive Problem Set
+
+## Cluster Setup
+
+Create an EMR cluster with **_Advanced Options_** and the following configuration:
+
+* Select `emr-5.23.0` from the drop-down
+* **Click check-boxes for these applications only**: Hadoop 2.8.5, Hive 2.3.4, Pig 0.17.0
+* Click Next
+* Edit the instance types and set 1 master and 4 core of m4.large 
+* Click Next
+* Give the cluster a name, and you can uncheck logging, debugging and termination protection enabled
+* Click Next
+* Select your key-pair
+* Click "Create Cluster"
+
+Once the cluster is in "Waiting" mode (should only take a few minutes), ssh into the master **with agent forwarding:**
+
+```
+ssh-add
+ssh -A hadoop@...
+```
+
+**Run the following commands, making sure to replace the values for `[[your-name]], [[your-email]] and [[your-assignment-repository]]` for the appropriate values.**
+
+```
+sudo yum install -y git
+git config --global user.name [[your name]]
+git config --global user.email [[your email]]
+git clone [[your-assignment-repository]]
+cd [[repository-directory]]
+```
+### Reminders
+
+* all files must be within the repository directory otherwise git will not see them.
+* commit and push back to GitHub as you are doing your work. **If you terminate the cluster and you did not push to GitHub, you will lose all your work.**
+* data in the cluster's HDFS will be lost when the cluster terminates. If you want to keep data, store it in S3.
+
+
+## Provide the Master Node and Cluster Metadata
+
+Once you are ssh'd into the master node, query the instance metadata and write to a file:
+
+```
+curl http://169.254.169.254/latest/dynamic/instance-identity/document/ > instance-metadata.json
+```
+
+Also, since you are using a cluster, please provide some metadata files about your cluster. Run the following commands:
+
+```
+cat /mnt/var/lib/info/instance.json > master-instance.json
+cat /mnt/var/lib/info/extraInstanceData.json > extra-master-instance.json
+```
+
+
+
+## Problem - Analyzing data with Pig and Hive
 
 In this assignment, you will be working with a large subset of a much larger dataset. The dataset you will be using is called the Google Ngram Dataset. You can read more about it here: [http://storage.googleapis.com/books/ngrams/books/datasetsv2.html](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html)
 
@@ -25,11 +80,7 @@ very cool	2012	9994	3020
 This tells us that in 1936, the bigram `I am` appeared 342 times in 90 different books. In 1945, `I am` appeared 211 times in 10 different books. Same for `very cool`: in 1923, it appeared 500 times in 10 books, etc.
 
 
-## SQL Tutorial
-
-You will need to write SQL code for this assignment, for the Hive section. For students that need to learn SQL, we recommend you take the Datacamp [Intro to SQL for Data Science](https://www.datacamp.com/courses/intro-to-sql-for-data-science). This covers what you need to know regarding SQL.
-
-## Analysis to perform on the dataset
+### Analysis to perform on the dataset
 
 **Since the total bigram set is significantly large, for this assignment you will only be working with the bigram files for specific letters. See below for details.**  
 
@@ -83,7 +134,9 @@ Couple of things to keep in mind:
 * If you want to show output in your screen use the LIMIT command (in PIG) and select only a few records in Hive
 * When developing your scripts you may want to use a single file in your LOAD command (in Pig) and when creating the external table in Hive. Pick one of the files for the specific letter to develop on. Once you are ready to run the whole set of files for a particular letter, you can use all of them specifying the directory
 
-**TASK:** You need to write a Pig script and a Hive script that perform the analysis explained above. 
+### Requirements for the Pig and Hive scripts
+
+Write a Pig script and a Hive script that perform the analysis explained above. 
 
 **Requirements for the Pig script only**
 
@@ -108,43 +161,6 @@ Remember that when you store the outputs of Pig/Hive, this output is inside HDFS
 The results files need to be called `pig-results.csv` and `hive-results.csv`.
 
 
-## Cluster Setup
-
-For this problem, you will use a 6 node cluster (1 master and 5 core nodes) of the **m4.xlarge** instance type. In testing, the Pig script took about 20 minutes to run end-to-end on all files for the letter. That is why you want to develop using a single file until you know the script produces the correct output. This cluster will cost approximately $1.50 per hour. **Remember to terminate the cluster when done.**
-
-Start an Amazon Elastic MapReduce (EMR) Cluster using Quickstart with the following setup:
-
-* In *General Configuration*
-	*  Give the cluster a name that is meaningful to you
-	*  Un-check *Logging*
-	*  Make sure that *Cluster* is selected, NOT *Step execution*
-*  In *Software configuration*
-	*  Select `emr-5.20.0` Release from the drop-down
-	*  Select the first option under Applications
-*  In *Hardware configuration*
-	*  Select `m4.xlarge` as instance types 
-	*  Enter `6` for number of instances (1 master and 5 core nodes)
-* In *Security and access*
-	* 	Select your correct EC2 keypair or you will not be able to connect to the cluster
-	*  Leave everything else the same
-	*  Click **Create Cluster**, and wait...
-
-
-## Provide the Master Node and Cluster Metadata
-
-Once you are ssh'd into the master node, query the instance metadata:
-
-```
-curl http://169.254.169.254/latest/dynamic/instance-identity/document/ > instance-metadata.json
-```
-
-Also, since you are using a cluster, please provide some metadata files about your cluster. Run the following commands:
-
-```
-cat /mnt/var/lib/info/instance.json > master-instance.json
-cat /mnt/var/lib/info/extraInstanceData.json > extra-master-instance.json
-```
-
 ## Submitting the Assignment
 
 Make sure you commit **only the files requested**, and push your repository to GitHub!
@@ -165,14 +181,16 @@ The files to be committed and pushed to the repository for this assignment are:
 
 Pig and Hive scripts are worth 3 points each. Output files are worth 2 points each.
 
-* We will look at the results files and the scripts. If the result files are exactly what is expected, in the proper format, etc., we may run your scripts to make sure they produce the output. If everything works, you will get full credit for the problem.
-* If the results files are not what is expected, or the scripts produce something different than expected, we will look at code and provide partial credit where possible and applicable.
-* Points will be deducted for each the following reasons:
-	* Instructions are not followed
-	* Output is not in expected format (not sorted, missing fields, wrong delimeter, unusual characters in the files)
-	* There are more files in your repository than need to be 
-	* There are additional lines in the results files (whether empty or not)
-	* Files in repository are not the requested filename
+-   We will look at the results files and/or scripts. If the result files are exactly what is expected, in the proper format, etc., we may run your scripts to make sure they produce the output. If everything works, you will get full credit for the problem.
+-   If the submitted results are not what is expected, we will look at and run your code and provide partial credit wherever possible and applicable.
+-   Points **will** be deducted for each the following reasons:
+    -   Instructions are not followed
+    -   Output is not in expected format (not sorted, missing fields, wrong delimiter, unusual characters in the files, etc.)
+    -   There are more files in your repository than need to be
+    -   There are additional lines in the results files (whether empty or not)
+    -   Files in repository are not the requested filename
+    -   Homework is late 
+
 
 
 	
